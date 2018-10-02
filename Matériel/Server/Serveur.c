@@ -263,7 +263,8 @@ void* TraitementClient(void* arg)
 		                        {
 		                            if(atoi(id) > 0)
 		                            {
-		                                strcat(buffer, "[");
+		                            	strcat(buffer, dir->d_name);
+		                                strcat(buffer, ": [");
 		                                strcat(buffer, id);
 		                                strcat(buffer, ", ");
 		                                strcat(buffer, libelle);
