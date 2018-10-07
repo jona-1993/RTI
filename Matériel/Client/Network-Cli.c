@@ -24,7 +24,7 @@ int Sockette(int* soc, int port)
         return -1;
     }
     
-    if((infosHost = gethostbyname("Chocotoff")) == 0)
+    if((infosHost = gethostbyname("ChocotoffServer")) == 0)
     {
         printf("Err d'acquisition sur l'ordi distant\n");
         return -1;
