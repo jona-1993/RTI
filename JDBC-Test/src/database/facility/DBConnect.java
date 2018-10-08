@@ -86,6 +86,7 @@ public class DBConnect {
     }
     
     public synchronized void Close() throws SQLException {
-        connection.close();
+        if(!connection.isClosed())
+            connection.close();
     }
 }

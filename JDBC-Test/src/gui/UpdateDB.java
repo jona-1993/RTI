@@ -47,7 +47,7 @@ public class UpdateDB extends javax.swing.JFrame {
         if(Action == INSERT)
         {
             ConditionsTF.setVisible(false);
-            ConditionsTF.setVisible(false);
+            ConditionsLabel.setVisible(false);
         }
         
         switch(table)
@@ -88,7 +88,7 @@ public class UpdateDB extends javax.swing.JFrame {
                 T3Label.setText("nbmaxparticipants: ");
                 T4Label.setText("duree: ");
                 T5Label.setText("prixHTVA: ");
-                T5Label.setVisible(false);
+                T6Label.setVisible(false);
                 T6TF.setVisible(false);
                 T7Label.setVisible(false);
                 T7TF.setVisible(false);
@@ -151,7 +151,7 @@ public class UpdateDB extends javax.swing.JFrame {
         ConditionsLabel = new javax.swing.JLabel();
         ConditionsTF = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         T1Label.setText("jLabel1");
 
@@ -186,7 +186,6 @@ public class UpdateDB extends javax.swing.JFrame {
         });
 
         CancelButton.setText("Cancel");
-        CancelButton.setActionCommand("Cancel");
         CancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CancelButtonActionPerformed(evt);
@@ -194,7 +193,6 @@ public class UpdateDB extends javax.swing.JFrame {
         });
 
         SendButton.setText("Send");
-        SendButton.setActionCommand("Send");
         SendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 SendButtonActionPerformed(evt);

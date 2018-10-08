@@ -6,19 +6,13 @@
 package gui;
 
 import database.facility.DBRequest;
-import java.awt.TextArea;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.Properties;
 import javax.swing.JTextArea;
 
@@ -61,6 +55,7 @@ public class JDBCTester extends javax.swing.JFrame {
             
             
             hash.put("IPOracleServer", prop.getProperty("IPOracleServer"));
+            hash.put("PortOracleServer", prop.getProperty("PortOracleServer"));
             hash.put("IDOracle", prop.getProperty("IDOracle"));
             hash.put("PWDOracle", prop.getProperty("PWDOracle"));
         }
@@ -78,7 +73,7 @@ public class JDBCTester extends javax.swing.JFrame {
             }
         }
         
-        try 
+        /*try 
         {
             request = new DBRequest("jdbc:mysql://" + hash.get("IPMySQLServer") + ":" + hash.get("PortMySQLServer") + "/BD_HOLIDAYS?serverTimezone=UTC", hash.get("IDMySQL"), hash.get("PWDMySQL"));
             LogTA.append("info: Vous êtes connecté à MySQL!\n");
@@ -90,7 +85,7 @@ public class JDBCTester extends javax.swing.JFrame {
         catch (SQLException ex) 
         {
             LogTA.append("err: " + ex.getMessage() + "\n");
-        }
+        }*/
     }
 
     /**
@@ -156,7 +151,7 @@ public class JDBCTester extends javax.swing.JFrame {
             }
         });
 
-        ActionCB.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Choix Action", "INSERT", "UPDATE", "DELETE", "SELECT" }));
+        ActionCB.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Choix Action", "INSERT", "UPDATE", "DELETE", "SELECT", "COUNT" }));
         ActionCB.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ActionCBActionPerformed(evt);
@@ -253,7 +248,7 @@ public class JDBCTester extends javax.swing.JFrame {
                     request = new DBRequest("jdbc:mysql://" + hash.get("IPMySQLServer") + ":" + hash.get("PortMySQLServer") + "/BD_HOLIDAYS?serverTimezone=UTC", hash.get("IDMySQL"), hash.get("PWDMySQL"));
                     break;
                 case "Oracle":
-                    request = new DBRequest("jdbc:oracle:thin:@" + hash.get("IPOracleServer") + ":orcl", hash.get("IDOracle"), hash.get("PWDOracle"));
+                    request = new DBRequest("jdbc:oracle:thin:@" + hash.get("IPOracleServer") + ":" + hash.get("PortOracleServer") + "/orcl", hash.get("IDOracle"), hash.get("PWDOracle"));
                     break;
             }
             
@@ -271,9 +266,10 @@ public class JDBCTester extends javax.swing.JFrame {
         try {
             // TODO add your handling code here:
             request.Close();
-        } catch (SQLException ex) {
-            Logger.getLogger(JDBCTester.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            System.err.println("request est null..");
         }
+        
     }//GEN-LAST:event_formWindowClosing
 
     private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
@@ -306,7 +302,6 @@ public class JDBCTester extends javax.swing.JFrame {
                     }
                     LogTA.append("\n");
                 }
-                
             }
             catch(SQLException e)
             {
@@ -407,6 +402,23 @@ public class JDBCTester extends javax.swing.JFrame {
                             ConditionsLabel.setVisible(true);
                             ConditionsTF.setVisible(true);
                             break;
+                case "COUNT":
+                ResultSet result;
+                ResultSetMetaData mdresult;
+                try 
+                {
+                    result = request.SelectTable(TableCB.getSelectedItem().toString(), "count(*)", "", new Hashtable<Integer, Object>());
+                    mdresult = result.getMetaData();
+                    int ncol = mdresult.getColumnCount();
+                    LogTA.append(mdresult.getColumnName(1) + "\n");
+                    if(result.next())
+                    {
+                        LogTA.append(result.getShort(1) + "\n");
+                    }
+                }   catch (SQLException ex) {
+                        LogTA.append(ex.getMessage() + "\n");
+                    }
+            
             }
         }
     }//GEN-LAST:event_TableCBActionPerformed

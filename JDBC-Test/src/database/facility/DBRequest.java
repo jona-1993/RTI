@@ -69,7 +69,10 @@ public class DBRequest {
     
     //Ici, il s'agit d'une requête simple. Je devrai créer créer des Selects moins génériques si je veux faire des requêtes plus élaborées
     public synchronized ResultSet SelectTable(String tables, String select, String condition, Hashtable<Integer, Object> hash) throws SQLException{
-        String request = "select " + select + " from " + tables + " where " + condition;
+        String request = "select " + select + " from " + tables;
+        
+        if(condition.length() > 0)
+            request += " where " + condition;
         
         return connection.SelectPrepared(request, hash);
     }

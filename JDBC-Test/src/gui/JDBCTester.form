@@ -186,12 +186,13 @@
     <Component class="javax.swing.JComboBox" name="ActionCB">
       <Properties>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="5">
+          <StringArray count="6">
             <StringItem index="0" value="Choix Action"/>
             <StringItem index="1" value="INSERT"/>
             <StringItem index="2" value="UPDATE"/>
             <StringItem index="3" value="DELETE"/>
             <StringItem index="4" value="SELECT"/>
+            <StringItem index="5" value="COUNT"/>
           </StringArray>
         </Property>
       </Properties>
