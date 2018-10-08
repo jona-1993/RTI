@@ -299,7 +299,10 @@ public class JDBCTester extends javax.swing.JFrame {
                 while(result.next()){
                     for(int i = 1; i < columnCount; i+=1)
                     {
-                        LogTA.append(result.getObject(i).toString() + " | ");
+                        if(result.getObject(i) == null)
+                            LogTA.append("NULL | ");
+                        else
+                            LogTA.append(result.getObject(i).toString() + " | ");
                     }
                     LogTA.append("\n");
                 }
@@ -341,7 +344,10 @@ public class JDBCTester extends javax.swing.JFrame {
                 while(result.next()){
                     for(int i = 1; i < columnCount; i+=1)
                     {
-                        LogTA.append(result.getObject(i).toString() + " | ");
+                        if(result.getObject(i) == null)
+                            LogTA.append("NULL | ");
+                        else
+                            LogTA.append(result.getObject(i).toString() + " | ");
                     }
                     LogTA.append("\n");
                 }
