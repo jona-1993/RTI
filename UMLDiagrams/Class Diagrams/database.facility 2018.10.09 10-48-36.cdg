@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="database.facility">
+  <ClassDiagramComponents>
+    <Class name="DBConnect" package="database.facility" visibility="public" xPosition="43.0" yPosition="22.0">
+      <Fields>
+        <Field name="connection" type="Connection" visibility="private"/>
+        <Field name="statement" type="Statement" visibility="private"/>
+        <Field name="pstatement" type="PreparedStatement" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="arg"/>
+          <Argument type="String" name="id"/>
+          <Argument type="String" name="pw"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="Request" returnType="ResultSet" visibility="public" isSynchronized="true">
+          <Argument type="String" name="arg"/>
+        </Method>
+        <Method name="UpdatePrepared" returnType="int" visibility="public" isSynchronized="true">
+          <Argument type="String" name="arg"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+        </Method>
+        <Method name="SelectPrepared" returnType="ResultSet" visibility="public" isSynchronized="true">
+          <Argument type="String" name="arg"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+        </Method>
+        <Method name="getConnection" returnType="Connection" visibility="public" isSynchronized="true"/>
+        <Method name="Close" returnType="void" visibility="public" isSynchronized="true"/>
+      </Methods>
+    </Class>
+    <Class name="DBRequest" package="database.facility" visibility="public" xPosition="308.0" yPosition="205.0">
+      <Fields>
+        <Field name="connection" type="DBConnect" visibility="private"/>
+        <Field name="COUNTVOYAGEURS" type="String" visibility="public" isStatic="true"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="String" name="arg"/>
+          <Argument type="String" name="id"/>
+          <Argument type="String" name="pw"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="SendSimpleRequest" returnType="ResultSet" visibility="public" isSynchronized="true">
+          <Argument type="String" name="arg"/>
+        </Method>
+        <Method name="InsertTable" returnType="int" visibility="public" isSynchronized="true">
+          <Argument type="String" name="columns"/>
+          <Argument type="String" name="table"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+        </Method>
+        <Method name="UpdateTable" returnType="int" visibility="public" isSynchronized="true">
+          <Argument type="String" name="columns"/>
+          <Argument type="String" name="table"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+          <Argument type="String" name="condition"/>
+        </Method>
+        <Method name="DropTable" returnType="int" visibility="public" isSynchronized="true">
+          <Argument type="String" name="table"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+          <Argument type="String" name="condition"/>
+        </Method>
+        <Method name="SelectTable" returnType="ResultSet" visibility="public" isSynchronized="true">
+          <Argument type="String" name="tables"/>
+          <Argument type="String" name="select"/>
+          <Argument type="String" name="condition"/>
+          <Argument type="Hashtable&lt;Integer, Object&gt;" name="hash"/>
+        </Method>
+        <Method name="getConnection" returnType="DBConnect" visibility="public" isSynchronized="true"/>
+        <Method name="Close" returnType="void" visibility="public" isSynchronized="true"/>
+      </Methods>
+    </Class>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <HasRelation name="connection" source="database.facility.DBRequest" target="database.facility.DBConnect" type="Aggregation" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <UseRelation source="database.facility.DBRequest" target="database.facility.DBConnect" sourceCardinality="1..1" targetCardinality="1..1"/>
+  </ClassDiagramRelations>
+</ClassDiagram>

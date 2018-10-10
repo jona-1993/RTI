@@ -313,9 +313,16 @@ public class JDBCTester extends javax.swing.JFrame {
             try
             {
                 request.DropTable(TableCB.getSelectedItem().toString(), new Hashtable<Integer, Object>(), ConditionsTF.getText());
+                LogTA.append("info: Ligne supprimée\n");
             }
             catch(SQLException e)
             {
+                try {
+                    request.getConnection().getConnection().rollback();
+                } catch (SQLException ex) {
+                    LogTA.append("err: " + ex.getMessage() + "\n");
+                }
+                
                 LogTA.append("err: " + e.getMessage() + "\n");
             }
         }
@@ -329,7 +336,7 @@ public class JDBCTester extends javax.swing.JFrame {
                 
                 ResultSetMetaData resultmd = result.getMetaData();
                 
-                int columnCount = resultmd.getColumnCount();
+                int columnCount = resultmd.getColumnCount() + 1;
                
                 for(int i = 1; i < columnCount; i+=1)
                 {

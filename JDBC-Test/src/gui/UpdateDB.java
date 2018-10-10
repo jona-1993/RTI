@@ -723,6 +723,12 @@ public class UpdateDB extends javax.swing.JFrame {
         }
         catch(SQLException e)
         {
+            try {
+                    request.getConnection().getConnection().rollback();
+                } catch (SQLException ex) {
+                    Win.LogTASnd.append("err: " + ex.getMessage() + "\n");
+                }
+            
             Win.LogTASnd.append("err: " + e.getMessage() + "\n");
         }
         

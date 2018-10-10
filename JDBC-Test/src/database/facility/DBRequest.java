@@ -62,7 +62,7 @@ public class DBRequest {
     
     
     public synchronized int DropTable(String table ,Hashtable<Integer, Object> hash, String condition) throws SQLException {
-        String request = "drop table " + table + " where " + condition;
+        String request = "delete from " + table + " where " + condition;
         
         return connection.UpdatePrepared(request, hash);
     }
