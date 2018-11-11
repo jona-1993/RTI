@@ -8,6 +8,7 @@ package database.facility;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 
@@ -24,6 +25,18 @@ public class DBRequest {
     
     public DBRequest(String arg, String id, String pw) throws ClassNotFoundException, SQLException {
         connection = new DBConnect(arg, id, pw);
+    }
+    
+    public synchronized void Commit() throws SQLException {
+        connection.getConnection().commit();
+    }
+    
+    public synchronized void Rollback() throws SQLException {
+        connection.getConnection().rollback();
+    }
+    
+    public synchronized void Rollback(Savepoint savepoint) throws SQLException {
+        connection.getConnection().rollback(savepoint);
     }
     
     // /!\ SQLInjection ! /!\
@@ -121,6 +134,56 @@ public class DBRequest {
             return 0;
     }
     
+    public synchronized int RoomIsFull(String login, int numchambre) throws SQLException {
+        ResultSet result;
+        Hashtable<Integer, Object> hash = new Hashtable<>();
+        
+        hash.put(0, getLoginIdentity(login));
+        hash.put(1, numchambre + 100);
+        
+        String request = "select (case when (A.nbvoy + 1) <= B.nboccupants then 0 else 1 end) as Plein "
+                + "from (select count(*) as nbvoy from VOYAGEURS where referent = ?) A, "
+                + "(select nboccupants from CHAMBRES where numero = ?) B";
+        
+        result = connection.SelectPrepared(request, hash);
+        
+        
+        if(result.next())
+            return result.getInt(1);
+        else
+            return -1;
+        
+    }
+    
+    public synchronized int RoomIsFree(int numchambre, Date datedebut, Date datefin) throws SQLException { // Chambre libre ou pas.. (Date début et fin)
+        ResultSet result;
+        Hashtable<Integer, Object> hash = new Hashtable<>();
+        
+        hash.put(0, datedebut);
+        hash.put(1, datefin);
+        hash.put(2, datedebut);
+        hash.put(3, datefin);
+        hash.put(4, datedebut);
+        hash.put(5, datefin);
+        hash.put(6, numchambre +100);
+
+       String request = "select count(*) from "
+                + "(select * from CHAMBRES, RESERVATIONS "
+                + "where DATE(?) between DATE(RESERVATIONS.datedebut) and DATE(RESERVATIONS.datefin) "
+                + "or DATE(?) between DATE(RESERVATIONS.datedebut) and DATE(RESERVATIONS.datefin) "
+                + "or DATE(RESERVATIONS.datedebut) between DATE(?) and DATE(?) "
+                + "and DATE(RESERVATIONS.datefin) between ? and DATE(?)) AS A "
+                + "where A.reservation = ?";
+        
+        result = connection.SelectPrepared(request, hash);
+        
+        
+        if(result.next())
+            return result.getInt(1);
+        else
+            return 0;
+    }
+    
     public synchronized int getFreeRoom(int numchambre, Date date) throws SQLException{ // Chambre libre ou pas..
         ResultSet result;
         Hashtable<Integer, Object> hash = new Hashtable<>();
@@ -146,6 +209,8 @@ public class DBRequest {
             return 0;
     }
     
+    
+    
     public synchronized ResultSet getFreeRoom(java.util.Date date) throws SQLException{ // Chambres libres
         ResultSet result;
         Hashtable<Integer, Object> hash = new Hashtable<>();
@@ -163,6 +228,8 @@ public class DBRequest {
         
         return result;
     }
+    
+    
     
     public synchronized int ReserverActivite(String login, String activite, java.util.Date datedebut, java.util.Date datefin) throws SQLException {
         int idVoy, idActi;
