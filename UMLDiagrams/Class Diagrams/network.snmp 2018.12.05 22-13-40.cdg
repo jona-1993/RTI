@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="network.snmp">
+  <ClassDiagramComponents>
+    <Class name="SNMPListener" package="network.snmp" visibility="public" xPosition="50.0" yPosition="124.0">
+      <Fields>
+        <Field name="snmpManager" type="Snmp" visibility="private"/>
+        <Field name="table" type="JTable" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="Snmp" name="snmpManager"/>
+          <Argument type="JTable" name="table"/>
+        </Constructor>
+        <Constructor visibility="public">
+          <Argument type="JTable" name="table"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="onResponse" returnType="void" visibility="public">
+          <Argument type="ResponseEvent" name="event"/>
+        </Method>
+        <Method name="setSnmpManager" returnType="void" visibility="public">
+          <Argument type="Snmp" name="snmpManager"/>
+        </Method>
+      </Methods>
+    </Class>
+    <Class name="SNMP" package="network.snmp" visibility="public" xPosition="417.0" yPosition="96.0">
+      <Fields>
+        <Field name="transport" type="TransportMapping" visibility="private"/>
+        <Field name="target" type="CommunityTarget" visibility="private"/>
+        <Field name="targetAddress" type="Address" visibility="private"/>
+        <Field name="pdu" type="PDU" visibility="private"/>
+        <Field name="snmp" type="Snmp" visibility="private"/>
+        <Field name="GET" type="int" visibility="public" isStatic="true" isFinal="true"/>
+        <Field name="GET_NEXT" type="int" visibility="public" isStatic="true" isFinal="true"/>
+        <Field name="GET_BULK" type="int" visibility="public" isStatic="true" isFinal="true"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public">
+          <Argument type="int" name="version"/>
+          <Argument type="String" name="community"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="get" returnType="ResponseEvent" visibility="public">
+          <Argument type="String" name="oid"/>
+          <Argument type="String" name="addr"/>
+          <Argument type="int" name="action"/>
+        </Method>
+        <Method name="set" returnType="ResponseEvent" visibility="public">
+          <Argument type="String" name="oid"/>
+          <Argument type="String" name="data"/>
+          <Argument type="String" name="addr"/>
+        </Method>
+        <Method name="getAsync" returnType="void" visibility="public">
+          <Argument type="String" name="oid"/>
+          <Argument type="String" name="addr"/>
+          <Argument type="int" name="action"/>
+          <Argument type="SNMPListener" name="listener"/>
+        </Method>
+        <Method name="walk" returnType="void" visibility="public">
+          <Argument type="String" name="addr"/>
+          <Argument type="JTable" name="table"/>
+        </Method>
+      </Methods>
+    </Class>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <UseRelation source="network.snmp.SNMP" target="network.snmp.SNMP" sourceCardinality="1..1" targetCardinality="1..1"/>
+  </ClassDiagramRelations>
+</ClassDiagram>

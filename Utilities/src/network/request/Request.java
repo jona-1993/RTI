@@ -5,6 +5,8 @@
  */
 package network.request;
 import database.facility.DBRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +14,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.Socket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Provider;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -23,6 +29,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import network.poolthreadserver.ConsoleServeur;
 import network.request.interfaces.Requete;
+import network.security.digest.BCDigest;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  *
@@ -31,6 +39,7 @@ import network.request.interfaces.Requete;
 public class Request implements Requete, Serializable {
     public final static int REQUEST_FUCAMP = 1;
     public final static int REQUEST_ROMP = 2;
+    public final static int REQUEST_HOLICOP = 3;
     private int type;
     private String chargeUtile;
     public String cmd;
@@ -78,6 +87,13 @@ public class Request implements Requete, Serializable {
                         @Override
                         public void run() {
                             Reservations(s, cs);
+                        }
+                    };
+                case REQUEST_HOLICOP:
+                    return new Runnable() {
+                        @Override
+                        public void run() {
+                            Chat(s, cs);
                         }
                     };
                 
@@ -144,7 +160,7 @@ public class Request implements Requete, Serializable {
 
                 if(cmd.compareTo("Login") == 0)
                 {
-
+                    
                     hash = new Hashtable<Integer, Object>();
                     hash.put(0, chargeUtile.split("#")[0]); // ID
                     hash.put(1, chargeUtile.split("#")[1]); // PASSWORD
@@ -372,6 +388,36 @@ public class Request implements Requete, Serializable {
                     oos.writeObject(rep);
                     oos.flush();
                 }
+                else if(cmd.compareTo("LoginMobile") == 0)
+                {
+
+                    hash = new Hashtable<Integer, Object>();
+                    hash.put(0, chargeUtile.split("#")[0]); // ID
+                    hash.put(1, chargeUtile.split("#")[1]); // PASSWORD
+                    
+                    System.err.println("ID: " + hash.get(0) + "\nPW: " + hash.get(1));
+                    try
+                    {
+                        hash.put(2, connect.getLoginIdentity(chargeUtile.split("#")[0]));
+                        
+                        result = connect.SelectTable("USERS", "count(*)", "login = ? and password = ? and VoyageurTitulaire is not NULL and ? in (select voyageurtitulaire from RESERVATIONS where paye = 1)", hash);
+                        result.next();
+                        if(result.getInt(1) == 1)
+                        {
+                            cmd = "Authenticated";
+                            rep = new ROMPResponse(ROMPResponse.OK, null, "Login");
+                        }
+                        else
+                            rep = new ROMPResponse(ROMPResponse.NOK, null, "Login");
+                    }
+                    catch(SQLException e)
+                    {
+                        System.err.println(e.getSQLState());
+                        rep = new ROMPResponse(ROMPResponse.ERROR, null, "Login");
+                    }
+                    oos.writeObject(rep);
+                    oos.flush();
+                }
                 else
                 {
                     rep = (ROMPResponse)ois.readObject();
@@ -504,6 +550,151 @@ public class Request implements Requete, Serializable {
         }
     }
     
+    
+    public void Chat(Socket s, ConsoleServeur cs){
+        
+        HOLICOPResponse rep;
+        Hashtable<Integer, Object> hash;
+        ResultSet result;
+        String MulticastAddrDaily = "240.1.1.1";
+        String PortChat = "6666";
+        Properties prop = new Properties();
+        InputStream in = null;
+
+        
+        hashdb = new Hashtable<String, String>();
+        
+        try
+        {
+            
+            in = new FileInputStream("settings.properties");
+
+            prop.load(in);
+            PortChat = prop.getProperty("DailyPortChat");
+            MulticastAddrDaily = prop.getProperty("DailyChatAddr");
+            
+            hashdb.put("MySQLEnabled", prop.getProperty("MySQLEnabled"));
+            if(hashdb.get("MySQLEnabled").compareTo("True") == 0)
+            {
+                hashdb.put("IpMySQL", prop.getProperty("IpMySQL"));
+                hashdb.put("PortMySQL", prop.getProperty("PortMySQL"));
+                hashdb.put("LoginMySQL", prop.getProperty("LoginMySQL"));
+                hashdb.put("PasswordMySQL", prop.getProperty("PasswordMySQL"));
+
+                AccessDB("jdbc:mysql://" + hashdb.get("IpMySQL") + ":" + hashdb.get("PortMySQL") 
+                        + "/BD_HOLIDAYS?serverTimezone=UTC", hashdb.get("LoginMySQL") , 
+                        hashdb.get("PasswordMySQL"), true);
+            }
+            else
+                AccessDB(null, null, null, false);
+
+        }
+        catch(IOException e)
+        {
+            System.err.println(e.getMessage());
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            if(in != null)
+                try {
+                    in.close();
+            } catch (IOException ex) {
+                    System.err.println(ex.getMessage());
+            }
+        }
+        
+        
+        try
+        {
+            if(cmd.compareTo("Login_Group") == 0)
+            {
+                BCDigest digest = new BCDigest("SHA-512");
+                hash = new Hashtable<Integer, Object>();
+                hash.put(0, chargeUtile); // ID
+                
+                System.err.println("Login: " + hash.get(0) + "\n");
+                try
+                {
+                    result = connect.SelectTable("USERS", "password", "login = ?", hash);
+
+                    if(result.next())
+                    {
+                        String pw = result.getString(1);
+                        
+                        rep = (HOLICOPResponse)ois.readObject();
+                        
+                        byte[] newdig = digest.ReceiveSaledDigest(chargeUtile, pw, rep.getTime(), rep.getAlea());
+                        
+                        
+                        if(MessageDigest.isEqual(rep.getDigest(), newdig) == true)
+                        {
+                            if(rep.getChargeUtile() != null)
+                            {
+                                hash = new Hashtable<Integer, Object>();
+                                hash.put(0, connect.getLoginIdentity(chargeUtile)); // Login
+                                hash.put(1, rep.getChargeUtile()); // Reserv
+                                result = connect.SelectTable("RESERVATIONS", "count(*)", "voyageurtitulaire = ? and reservation = ?", hash);
+                                
+                                result.next();
+                                
+                                if(result.getInt(1) > 0)
+                                {
+                                    cmd = "Authenticated";
+                                    rep = new HOLICOPResponse(HOLICOPResponse.OK, MulticastAddrDaily + "#" + PortChat, "Login_Group");
+                                }
+                                else
+                                {
+                                    rep = new HOLICOPResponse(HOLICOPResponse.NOK, "Le numéro de réservation n'existe pas !", "Login_Group");
+                                }
+                            }
+                            else
+                            {
+                                cmd = "Authenticated";
+                                rep = new HOLICOPResponse(HOLICOPResponse.OK, MulticastAddrDaily + "#" + PortChat, "Login_Group");
+                            }
+                        }
+                        else
+                        {
+                            rep = new HOLICOPResponse(HOLICOPResponse.NOK, null, "Login_Group");
+                        }
+
+                    }
+                    else
+                    {
+                        rep = new HOLICOPResponse(HOLICOPResponse.NOK, null, "Login_Group");
+                    }
+                }
+                catch(SQLException e)
+                {
+                    System.err.println(e.getSQLState());
+                    rep = new HOLICOPResponse(FUCAMPResponse.ERROR, e.getSQLState(), "Login_Group");
+                } catch (ClassNotFoundException ex) {
+                    rep = new HOLICOPResponse(FUCAMPResponse.ERROR, ex.getMessage(), "Login_Group");
+                    Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                oos.writeObject(rep);
+                oos.flush();
+                
+                // On en a fini avec TCP, on passe à l'UDP
+                oos.close();
+                ois.close();
+                s.close();
+            }
+        }
+        catch(IOException e)
+        {
+            cs.TraceEvents("Client Déconnecté#Chat#" + Thread.currentThread().getName());
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchProviderException ex) {
+            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
     
     public Socket getSocket(){
         return soc;

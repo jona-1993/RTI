@@ -19,8 +19,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -343,6 +353,7 @@ public class ServletReservations extends HttpServlet {
                         try
                         {
                             panier.ApplyTVA(21); // TVA 21% sur le "Luxe" ici même si il y a du crado
+                            
                             if(Payer(request.getParameter("NumCard"), panier.getPrix()))
                             {
                                 hash.put(0, 1);
@@ -397,6 +408,15 @@ public class ServletReservations extends HttpServlet {
 
                             dispatcher = sc.getRequestDispatcher("/JSPPay.jsp");
                             dispatcher.forward(request, response);
+                        } catch (MessagingException ex) {
+                            try {
+                                connection.Rollback();
+                            } catch (SQLException ex1) {
+                                Logger.getLogger(ServletReservations.class.getName()).log(Level.SEVERE, null, ex1);
+                            }
+                            Logger.getLogger(ServletReservations.class.getName()).log(Level.SEVERE, null, ex);
+                            message = new Message("Une erreur s'est produite lors de votre paiement: " + ex.getMessage());
+                            session.setAttribute("Message", message);
                         }
                     }
                     else
@@ -454,10 +474,48 @@ public class ServletReservations extends HttpServlet {
         }*/
     }
     
-    private boolean Payer(String numcarte, int prix) {
+    private boolean Payer(String numcarte, int prix) throws AddressException, MessagingException {
         // Paiements
+        
+        Session sess;
+        Properties props = new Properties();
+        MimeMessage message;
+        
+        
+        props.put("mail.smtp.host", "u2");
+        props.put("file.encoding", "utf-8");
+        props.put("mail.smtp.port", "25");
+        
+        sess = Session.getDefaultInstance(props, null);
+        
+        
+    
         if(numcarte.length() > 5)
+        {
+            message = new MimeMessage(sess);
+            
+            message.setFrom(new InternetAddress("capitano@u2.tech.hepl.local"));
+            
+            InternetAddress to = new InternetAddress("capitano@u2.tech.hepl.local");
+            
+            message.addRecipient(javax.mail.Message.RecipientType.TO, to);
+            
+            
+            message.setSubject("Etat de votre paiement");
+            
+            Multipart mp = new MimeMultipart();
+            
+            MimeBodyPart mbp = new MimeBodyPart();
+            mbp.setText("Votre paiement a été effectué avec succès !");
+            mp.addBodyPart(mbp);
+            
+            message.setContent(mp);
+            
+            
+            Transport.send(message);
+            
             return true;
+        }
         else
             return false;
     }

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ClassDiagram name="Multi-package class diagram">
+  <ClassDiagramComponents>
+    <Class name="Panier" package="caddie" visibility="public" xPosition="48.0" yPosition="172.0">
+      <Fields>
+        <Field name="items" type="ArrayList&lt;Calculable&gt;" visibility="private"/>
+        <Field name="prix" type="int" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public"/>
+        <Constructor visibility="public">
+          <Argument type="ArrayList&lt;Calculable&gt;" name="items"/>
+          <Argument type="int" name="prix"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="setItems" returnType="void" visibility="public">
+          <Argument type="ArrayList&lt;Calculable&gt;" name="items"/>
+        </Method>
+        <Method name="setPrix" returnType="void" visibility="public">
+          <Argument type="int" name="prix"/>
+        </Method>
+        <Method name="getItems" returnType="ArrayList&lt;Calculable&gt;" visibility="public"/>
+        <Method name="getPrix" returnType="int" visibility="public"/>
+        <Method name="addItem" returnType="void" visibility="public">
+          <Argument type="Calculable" name="arg"/>
+        </Method>
+        <Method name="removeItem" returnType="void" visibility="public">
+          <Argument type="Calculable" name="arg"/>
+        </Method>
+        <Method name="PurgePanier" returnType="void" visibility="public"/>
+        <Method name="ApplyRemise" returnType="void" visibility="public">
+          <Argument type="int" name="tauxremise"/>
+        </Method>
+        <Method name="ApplyTVA" returnType="void" visibility="public">
+          <Argument type="int" name="tauxTVA"/>
+        </Method>
+        <Method name="ResetPrix" returnType="void" visibility="public"/>
+        <Method name="IsEmpty" returnType="boolean" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="Chambre" package="items" visibility="public" xPosition="510.0" yPosition="46.0">
+      <Fields>
+        <Field name="numero" type="int" visibility="private"/>
+        <Field name="equipement" type="String" visibility="private"/>
+        <Field name="nboccupants" type="int" visibility="private"/>
+        <Field name="prixHTVA" type="int" visibility="private"/>
+        <Field name="categorie" type="String" visibility="private"/>
+        <Field name="type" type="String" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public"/>
+        <Constructor visibility="public">
+          <Argument type="int" name="numero"/>
+          <Argument type="String" name="equipement"/>
+          <Argument type="int" name="nboccupants"/>
+          <Argument type="int" name="prixHTVA"/>
+          <Argument type="String" name="categorie"/>
+          <Argument type="String" name="type"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="setCategorie" returnType="void" visibility="public">
+          <Argument type="String" name="categorie"/>
+        </Method>
+        <Method name="setEquipement" returnType="void" visibility="public">
+          <Argument type="String" name="equipement"/>
+        </Method>
+        <Method name="setNboccupants" returnType="void" visibility="public">
+          <Argument type="int" name="nboccupants"/>
+        </Method>
+        <Method name="setNumero" returnType="void" visibility="public">
+          <Argument type="int" name="numero"/>
+        </Method>
+        <Method name="setPrixHTVA" returnType="void" visibility="public">
+          <Argument type="int" name="prixHTVA"/>
+        </Method>
+        <Method name="setType" returnType="void" visibility="public">
+          <Argument type="String" name="type"/>
+        </Method>
+        <Method name="getCategorie" returnType="String" visibility="public"/>
+        <Method name="getEquipement" returnType="String" visibility="public"/>
+        <Method name="getNboccupants" returnType="int" visibility="public"/>
+        <Method name="getNumero" returnType="int" visibility="public"/>
+        <Method name="getPrixHTVA" returnType="int" visibility="public"/>
+        <Method name="getType" returnType="String" visibility="public"/>
+        <Method name="getPrice" returnType="int" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="Message" package="messages" visibility="public" xPosition="753.0" yPosition="548.0">
+      <Fields>
+        <Field name="message" type="String" visibility="private"/>
+      </Fields>
+      <Constructors>
+        <Constructor visibility="public"/>
+        <Constructor visibility="public">
+          <Argument type="String" name="message"/>
+        </Constructor>
+      </Constructors>
+      <Methods>
+        <Method name="setMessage" returnType="void" visibility="public">
+          <Argument type="String" name="message"/>
+        </Method>
+        <Method name="getMessage" returnType="String" visibility="public"/>
+      </Methods>
+    </Class>
+    <Class name="ServletReservations" package="servlets" visibility="public" xPosition="115.0" yPosition="528.0">
+      <Fields>
+        <Field name="connection" type="DBRequest" visibility="private"/>
+      </Fields>
+      <Constructors/>
+      <Methods>
+        <Method name="init" returnType="void" visibility="public">
+          <Argument type="ServletConfig" name="config"/>
+        </Method>
+        <Method name="destroy" returnType="void" visibility="public"/>
+        <Method name="processRequest" returnType="void" visibility="protected">
+          <Argument type="HttpServletRequest" name="request"/>
+          <Argument type="HttpServletResponse" name="response"/>
+        </Method>
+        <Method name="Payer" returnType="boolean" visibility="private">
+          <Argument type="String" name="numcarte"/>
+          <Argument type="int" name="prix"/>
+        </Method>
+        <Method name="IsAuthenticated" returnType="boolean" visibility="private">
+          <Argument type="HttpSession" name="session"/>
+        </Method>
+        <Method name="doGet" returnType="void" visibility="protected">
+          <Argument type="HttpServletRequest" name="request"/>
+          <Argument type="HttpServletResponse" name="response"/>
+        </Method>
+        <Method name="doPost" returnType="void" visibility="protected">
+          <Argument type="HttpServletRequest" name="request"/>
+          <Argument type="HttpServletResponse" name="response"/>
+        </Method>
+        <Method name="getServletInfo" returnType="String" visibility="public"/>
+      </Methods>
+    </Class>
+    <Interface name="Calculable" package="caddie" visibility="public" xPosition="277.0" yPosition="46.0">
+      <Methods>
+        <Method name="getPrice" returnType="int" visibility="public"/>
+      </Methods>
+    </Interface>
+  </ClassDiagramComponents>
+  <ClassDiagramRelations>
+    <UseRelation source="caddie.Panier" target="caddie.Calculable" sourceCardinality="1..1" targetCardinality="1..1"/>
+    <HasRelation name="items" source="caddie.Panier" target="caddie.Calculable" type="Aggregation" sourceCardinality="1..1" targetCardinality="0..*" collectionType="ArrayList&lt;Calculable&gt;"/>
+    <ImplementsRelation name="&lt;&lt;implements&gt;&gt;" source="items.Chambre" target="caddie.Calculable"/>
+  </ClassDiagramRelations>
+</ClassDiagram>
