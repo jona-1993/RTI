@@ -262,6 +262,8 @@ public class DBRequest {
                 
                 connection.UpdatePrepared(request, hash);
                 
+                connection.getConnection().commit();
+                
                 return 1;
             }
         }
@@ -276,6 +278,9 @@ public class DBRequest {
         java.util.Date d = new java.util.Date();
         Hashtable<Integer, Object> hash;
         ResultSet result;
+        System.err.println("A RESERVER: ");
+        System.err.println("Login: " + login);
+        System.err.println("numChambre: " + numChambre);
         
         if((idVoy = getLoginIdentity(login)) > 0){
             
@@ -303,6 +308,8 @@ public class DBRequest {
 
                 connection.UpdatePrepared(request, hash);
 
+                connection.getConnection().commit();
+                
                 return 1;
             }
             else

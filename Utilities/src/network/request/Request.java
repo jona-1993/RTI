@@ -450,9 +450,9 @@ public class Request implements Requete, Serializable {
                                 }
                                 break;
                         case "BROOM":
+                            
                             try
                             {
-                                System.err.println(rep.getChargeUtile());
                                 SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
                                 
                                 if(connect.ReserverChambre(rep.getChargeUtile().split("#")[0], Integer.parseInt(rep.getChargeUtile().split("#")[1]) , f.parse(rep.getChargeUtile().split("#")[2]), f.parse(rep.getChargeUtile().split("#")[3])) > 0){
@@ -476,13 +476,46 @@ public class Request implements Requete, Serializable {
                             try
                             {
                                 SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-                                result = connect.SelectTable("RESERVATIONS", "*", "id >= 100", new Hashtable<Integer, Object>());
+                                result = connect.SelectTable("RESERVATIONS", "*", "reservation >= 100", new Hashtable<Integer, Object>());
                                 String send = "";
                                     
                                     while(result.next())
                                     {
                                         System.err.println(result.getString(1));
                                         send += "ID: " + result.getString(1) + " IDVOY: " + result.getInt(2) + " RESERV: " + result.getInt(3) + " DATE DEB: " + f.format(result.getDate(4)) + " DATE FIN: " + f.format(result.getDate(5)) + " PRIX NET: " + result.getInt(6) + " PAYE: " + result.getBoolean(7) + "#";
+                                    }
+                                    if(send.length() > 0)
+                                    {
+                                        send = send.substring(0, send.length()-1);
+                                        rep = new ROMPResponse(ROMPResponse.OK, send, "LROOMS");
+                                    }
+                                    else
+                                        rep = new ROMPResponse(ROMPResponse.NOK, null, "LROOMS");
+                            }
+                            catch(SQLException e)
+                            {
+                                rep = new ROMPResponse(ROMPResponse.ERROR, e.getSQLState(), "LROOMS");
+                            }
+                            break;
+                        case "LMYROOMS":
+                            try
+                            {
+                                hash = new Hashtable<>();
+                                System.err.println("LOGIN = " + rep.getChargeUtile());
+                                hash.put(0, connect.getLoginIdentity(rep.getChargeUtile().split("#")[0]));
+                                SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
+                                if(rep.getChargeUtile().split("#")[1].compareTo("ALL") == 0)
+                                    result = connect.SelectTable("RESERVATIONS", "*", "reservation >= 100 and voyageurtitulaire = ?", hash);
+                                else
+                                    result = connect.SelectTable("RESERVATIONS", "*", "reservation >= 100 and paye = 0 and voyageurtitulaire = ?", hash);
+                                
+                                String send = "";
+                                    
+                                    while(result.next())
+                                    {
+                                        System.err.println(result.getString(1));
+                                        send += "ID: " + result.getString(1) + " IDVOY: " + result.getInt(2) + " RESERV: " + result.getInt(3) + " DATE DEB: " + f.format(result.getDate(4)) + " DATE FIN: " + f.format(result.getDate(5)) + " PRIX NET: " + result.getInt(6) + " PAYE: " + result.getBoolean(7) + "#";
+                                        
                                     }
                                     if(send.length() > 0)
                                     {
@@ -506,12 +539,23 @@ public class Request implements Requete, Serializable {
                                     hash.put(2, false);
                                     
                                     if(connect.DropTable("RESERVATIONS", hash, "id = ? and voyageurtitulaire = ? and paye = ?") == 1) // Pourquoi voyageur titulaire? Pour éviter que n'importe qui delete la réservation des autres
+                                    {
+                                        connect.Commit();
                                         rep = new ROMPResponse(ROMPResponse.OK, null, "CROOM");
+                                    }
                                     else
+                                    {
+                                        connect.Rollback();
                                         rep = new ROMPResponse(ROMPResponse.NOK, null, "CROOM");
+                                    }
                                 }
                                 catch (SQLException e)
                                 {
+                                    try {
+                                        connect.Rollback();
+                                    } catch (SQLException ex) {
+                                        Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                     rep = new ROMPResponse(ROMPResponse.ERROR, e.getSQLState(), "CROOM");
                                 }
                             break;
@@ -526,12 +570,25 @@ public class Request implements Requete, Serializable {
                                     
                                     
                                     if(connect.UpdateTable("paye", "RESERVATIONS", hash, "voyageurtitulaire = ? and id like ?") > 0)
+                                    {
+                                        connect.Commit();
+                                    
                                         rep = new ROMPResponse(ROMPResponse.OK, null, "PROOM");
+                                    }
                                     else
+                                    {
+                                        connect.Rollback();
+                                        
                                         rep = new ROMPResponse(ROMPResponse.NOK, null, "PROOM");
+                                    }
                                 }
                                 catch (SQLException e)
                                 {
+                                    try {
+                                        connect.Rollback();
+                                    } catch (SQLException ex) {
+                                        Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                     rep = new ROMPResponse(ROMPResponse.ERROR, e.getSQLState(), "PROOM");
                                 }
                             break;
